@@ -1,0 +1,10 @@
+uwsgi
+flask
+peewee
+flask-login
+flask-mail
+flask-wtf
+flipflop
+flask-babel
+guess_language
+python-ldap

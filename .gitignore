@@ -1,0 +1,6 @@
+config.py
+*pyc
+*.pyc
+app/__pycache__/*
+app/__pycache__/
+app/secret.py

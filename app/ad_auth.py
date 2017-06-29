@@ -47,7 +47,7 @@ class ADAuth(object):
 
                 if "member" in result_attrs:
                     for member in result_attrs["member"]:
-                        member_cn = member.split(',')[0]
+                        member_cn = member.decode('utf8').split(',')[0]
                         if member_cn.lower() == s_user.lower():
                             is_member = True
             return is_member

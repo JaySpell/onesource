@@ -25,4 +25,4 @@ class User(UserMixin):
             return str(self.id)  # python 3
 
     def __repr__(self):
-return '<User %r>' % (self.id)
+        return '<User %r>' % (self.id)

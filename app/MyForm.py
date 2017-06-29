@@ -30,10 +30,7 @@ class LoginForm(Form):
 
 
 class MyBaseForm(Form):
-    one_status = StringField()
-    one_app_status = StringField()
-    one_service_status = StringField()
-    onesource = BooleanField('onesource.memorialhermann.org')
+    onesource = BooleanField('test.jspell.mhhs.org')
     onesourceapps = BooleanField('onesourceapps.mhhs.org')
     onesourceservices = BooleanField('onesourceservices')
 

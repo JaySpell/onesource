@@ -8,10 +8,27 @@ from wtforms import BooleanField, Form
 from app.ad_auth import ADAuth
 import ldap
 from app import secret
-from app import app
+from app import app, login_manager
+from app.user import User
 
 sys.path.append('/home/jspell/Documents/dev')
 from f5tools import gtm, ltm
+
+all_users = {}
+
+
+@login_manager.user_loader
+def load_user(username):
+    '''
+    Loads user from the currently authenticated AD user
+    '''
+    try:
+        if username in all_users.keys():
+            user = User(username)
+            user.id = username
+            return user
+    except:
+        return None
 
 
 @app.route('/')
@@ -37,7 +54,7 @@ def login():
         try:
             if auth.check_group_for_account() == True:
                 all_users[username] = None
-                user = User(unicode(auth.user))
+                user = User(auth.user)
                 login_user(user)
                 '''if not next_is_valid(next):
                     return flask.abort(400)'''
@@ -45,34 +62,35 @@ def login():
             else:
                 raise ValueError('not member of AD group ')
         except ValueError as e:
-            error = unicode(e) + " invalid credentials %s..." % username
+            error = str(e) + " invalid credentials %s..." % username
 
     return render_template("login.html", form=myform, error=error)
 
 
 @app.route('/f5tool', methods=['GET', 'POST'])
+@login_required
 def f5tool():
     error = None
     all_wide_ip = secret.get_wideip()
-
-    if request.POST == 'POST':
-        one_val = form.one.data
+    form = MyBaseForm()
+    gtmutil = gtm.GTMUtils()
+    if request.method == 'POST':
+        one_val = form.onesource.data
         onesourceapps_val = form.onesourceapps.data
         onesourceservices_val = form.onesourceservices.data
         if one_val or onesourceapps_val or onesourceservices_val:
             if one_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip['one'])
+                gtmutil.switch_primary_gtm_pool(all_wide_ip[0])
             elif onesourceapps_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip['onesourceapps'])
+                gtmutil.switch_primary_gtm_pool(all_wide_ip[1])
             elif onesourceservices_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip['onesourceservices'])
+                gtmutil.switch_primary_gtm_pool(all_wide_ip[2])
 
-    form = MyBaseForm()
-    primary_sites = query_prime_pool(all_wide_ip)
-    return render_template('f5form.html', form=form
-                           one=primary_sites['one'],
-                           oneapps=primary_sites['onesourceapps'],
-                           oneservices=primary_sites['oneservices'])
+    primary_sites = query_prime_pool(all_wide_ip, gtmutil)
+    return render_template('f5form.html', form=form,
+                           one=primary_sites['test.jspell.mhhs.org']['site'],
+                           oneapps=None,
+                           oneservices=None)
 
 
 @app.route('/test', methods=['GET'])
@@ -92,8 +110,7 @@ def wide_ip_view(all_wide_ip):
     return form
 
 
-def query_prime_pool(pools):
-    gtmutil = f5tool.GTMUtils()
+def query_prime_pool(pools, gtmutil):
     r_status = {}
     for pool in pools:
         r_status[pool] = gtmutil.get_primary_pool_member(pool)

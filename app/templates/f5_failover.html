@@ -1,0 +1,27 @@
+<html>
+<body>
+Onesource Failed over from
+  <bold> {{ site_before }} </bold> to
+  <bold> {{ site_after }} </bold>
+<table>
+<tr>
+    <td>
+    Failover Performed By:
+    </td>
+    <td>
+      {{ sc_account }}
+    </td>
+</tr>
+<tr>
+  <td>
+    Site Failed Over:
+  </td>
+  {% for site in sites %}
+  <td>
+    {{ site }}
+  </td>
+  {% endfor %}
+</tr>
+
+</table>
+</html>

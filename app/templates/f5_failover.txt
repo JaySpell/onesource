@@ -1,0 +1,6 @@
+Following customer has requested an increase in quota space.
+
+Failover Performed By: {{ sc_account }}
+Site Failover: {%for site in sites %} {{ site }} {% endfor %}
+
+Sites failed from {{ site_before }} to {{ site_after }}

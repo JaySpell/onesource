@@ -1,5 +1,5 @@
 __author__ = 'jspell'
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField,
                      validators, BooleanField,
                      RadioField, PasswordField,
@@ -10,7 +10,7 @@ from wtforms.validators import (DataRequired, Required,
 GTM_WIDEIP = ['test.jspell.mhhs.org']
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     username = StringField(
         'Username',
         validators=[
@@ -29,12 +29,20 @@ class LoginForm(Form):
         ])
 
 
-class MyBaseForm(Form):
+class MyBaseForm(FlaskForm):
     onesource = BooleanField('test.jspell.mhhs.org')
     onesourceapps = BooleanField('onesourceapps.mhhs.org')
     onesourceservices = BooleanField('onesourceservices')
 
 
-class BoolWideIP(Form):
+class BoolWideIP(FlaskForm):
     pass
     #wideips = FieldList(FormField(BooleeanForm), min_entries=1)
+
+
+class TestForm(FlaskForm):
+
+    @classmethod
+    def append_field(cls, name, field):
+        setattr(cls, name, field)
+        return cls

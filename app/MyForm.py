@@ -40,7 +40,7 @@ class BoolWideIP(FlaskForm):
     #wideips = FieldList(FormField(BooleeanForm), min_entries=1)
 
 
-class TestForm(FlaskForm):
+class SelectForm(FlaskForm):
 
     @classmethod
     def append_field(cls, name, field):

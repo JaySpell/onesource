@@ -10,7 +10,7 @@ import ldap
 from app import secret
 from app import app, login_manager
 from app.user import User
-from app.MyForm import TestForm
+from app.MyForm import SelectForm
 
 sys.path.append('/home/jspell/Documents/dev')
 from f5tools import gtm, ltm
@@ -68,58 +68,52 @@ def login():
 
 
 @app.route('/f5tool', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def f5tool():
     error = None
     all_wide_ip = secret.get_wideip()
-    form = MyBaseForm()
+    print(all_wide_ip)
+    form = SelectForm()
+
+    # Determine primary site for all sites
     gtmutil = gtm.GTMUtils()
     primary_sites = query_prime_pool(all_wide_ip, gtmutil)
+    #session['primary_sites'] = primary_sites
+    #session['gtmutil'] = gtmutil
 
     # If POST then switch sites / email
     if request.method == 'POST':
-
+        1 / 0
         # Setup email params
         email_dict = {}
         email_dict['sc_account'] = current_user
         email_dict['sites'] = []
 
         # Find which of the checkboxes have been selected
-        one_val = form.onesource.data
-        onesourceapps_val = form.onesourceapps.data
-        onesourceservices_val = form.onesourceservices.data
+        select = {}
+        for name, value in form.data.items():
+            select[name] = value
+        # For each checked perform failover / add to email
+        for k, v in select.items():
+            if v:
+                gtmutil.switch_primary_gtm_pool(k)
+                email_dict['sites'].append(k)
+                email_dict['site_before'] = primary_sites[k]['site']
 
-        # For each checked perform failover
-        if one_val or onesourceapps_val or onesourceservices_val:
-            if one_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip[0])
-                email_dict['sites'].append(all_wide_ip[0])
-                email_dict['site_before'] = primary_sites['test.jspell.mhhs.org']['site']
-            if onesourceapps_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip[1])
-                email_dict['sites'].append(all_wide_ip[1])
-                email_dict['site_before'] = primary_sites['onesourceapps']['site']
-            if onesourceservices_val:
-                gtmutil.switch_primary_gtm_pool(all_wide_ip[2])
-                email_dict['sites'].append(all_wide_ip[2])
-                email_dict['site_before'] = primary_sites['onesourceservices']['site']
+        # Send email
+        send_email(email_dict)
 
-            # Send email
-            send_email(email_dict)
-
-    # Determine primary site for all sites
-    print(primary_sites)
-    return render_template('f5form.html', form=form,
-                           one=primary_sites['test.jspell.mhhs.org']['site'],
-                           oneapps=None,
-                           oneservices=None)
+    form = _create_form(all_wide_ip)
+    a_form = form()
+    1 / 0
+    return render_template('f5form.html', form=a_form)
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     all_wide_ip = secret.get_wideip()
     first_wide_ip = all_wide_ip.pop(0)
-    form = TestForm.append_field(first_wide_ip, BooleanField(first_wide_ip))
+    form = SelectForm.append_field(first_wide_ip, BooleanField(first_wide_ip))
     for wide_ip in all_wide_ip:
         form.append_field(wide_ip, BooleanField(wide_ip))
         print(form)
@@ -127,23 +121,23 @@ def test():
     return render_template('test.html', form=a_form)
 
 
-def wide_ip_view(all_wide_ip):
-    class F(MyBaseForm):
-        pass
-
-    for wideip in all_wide_ip:
-        setattr(F, label, BooleanField())
-
-    form = F()
-
-    return form
-
-
 def query_prime_pool(pools, gtmutil):
     r_status = {}
     for pool in pools:
         r_status[pool] = gtmutil.get_primary_pool_member(pool)
     return r_status
+
+
+def _create_form(all_wide_ip):
+    # Create form - a checkbox per wideip from config file
+    # must create form before iterating (pop first value)
+    first_wide_ip = all_wide_ip.pop(0)
+    form = SelectForm.append_field(first_wide_ip, BooleanField(first_wide_ip))
+
+    for wide_ip in all_wide_ip:
+        form.append_field(wide_ip, BooleanField(wide_ip))
+
+    return form
 
 
 def send_email(email_dict):

@@ -1,3 +1,16 @@
-<html>
+{% extends "base.html" %}
+{% from 'macro.html' import render_field %}
+{% block content %}
+{{ form.hidden_tag() }}
+SITE: {{ one }} for example.org
+<form action="" method="post" name="f5form">
+  {% for field in form if field.widget.input_type != 'hidden' %}
+    <div class="item">
+      {{ render_field(field) }} {{ field.label }}
+    </div>
+  {% endfor %}
+  <br>
+  <button type="submit" class="btn btn-success">Failover</button>
+</form>
 <bold>TEST</bold>
-</html>
+{% endblock %}

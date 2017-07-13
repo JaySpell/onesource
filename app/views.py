@@ -16,6 +16,7 @@ sys.path.append('/home/jspell/Documents/dev')
 from f5tools import gtm, ltm
 
 all_users = {}
+gtmutil = gtm.GTMUtils()
 
 
 @login_manager.user_loader
@@ -70,42 +71,21 @@ def login():
 @app.route('/f5tool', methods=['GET', 'POST'])
 #@login_required
 def f5tool():
+    form = SelectForm()
     error = None
     all_wide_ip = secret.get_wideip()
-    print(all_wide_ip)
-    form = SelectForm()
-
-    # Determine primary site for all sites
-    gtmutil = gtm.GTMUtils()
-    primary_sites = query_prime_pool(all_wide_ip, gtmutil)
-    #session['primary_sites'] = primary_sites
-    #session['gtmutil'] = gtmutil
 
     # If POST then switch sites / email
-    if request.method == 'POST':
-        1 / 0
-        # Setup email params
-        email_dict = {}
-        email_dict['sc_account'] = current_user
-        email_dict['sites'] = []
+    if form.is_submitted():
+        _switch_sites(form)
 
-        # Find which of the checkboxes have been selected
-        select = {}
-        for name, value in form.data.items():
-            select[name] = value
-        # For each checked perform failover / add to email
-        for k, v in select.items():
-            if v:
-                gtmutil.switch_primary_gtm_pool(k)
-                email_dict['sites'].append(k)
-                email_dict['site_before'] = primary_sites[k]['site']
+    # Determine primary site for all sites
+    primary_sites = query_prime_pool(all_wide_ip)
+    session['primary_sites'] = dict(primary_sites)
 
-        # Send email
-        send_email(email_dict)
-
-    form = _create_form(all_wide_ip)
+    form = _create_form(primary_sites)
     a_form = form()
-    1 / 0
+
     return render_template('f5form.html', form=a_form)
 
 
@@ -121,21 +101,50 @@ def test():
     return render_template('test.html', form=a_form)
 
 
-def query_prime_pool(pools, gtmutil):
+def _switch_sites(form):
+    # Setup email params
+    email_dict = {}
+    email_dict['sc_account'] = current_user
+    email_dict['sites'] = []
+
+    # Find which of the checkboxes have been selected
+    select = {}
+    for name, value in form.data.items():
+        select[name] = value
+
+    primary_sites = session['primary_sites']
+
+    # For each checked perform failover / add to email
+    for k, v in select.items():
+        if v:
+            gtmutil.switch_primary_gtm_pool(k)
+            email_dict['sites'].append(k)
+            email_dict['site_before'] = primary_sites[k]['site']
+
+    # Send email
+    send_email(email_dict)
+
+
+def query_prime_pool(pools):
     r_status = {}
     for pool in pools:
         r_status[pool] = gtmutil.get_primary_pool_member(pool)
     return r_status
 
 
-def _create_form(all_wide_ip):
+def _create_form(primary_sites):
     # Create form - a checkbox per wideip from config file
     # must create form before iterating (pop first value)
-    first_wide_ip = all_wide_ip.pop(0)
-    form = SelectForm.append_field(first_wide_ip, BooleanField(first_wide_ip))
+    all_wide_ip = dict(primary_sites)
+    first_wide_ip = all_wide_ip.popitem()
+    first_label_field = "{} - {}".format(first_wide_ip[0],
+                                         first_wide_ip[1]['site'])
+    form = SelectForm.append_field(first_wide_ip[0],
+                                   BooleanField(first_label_field))
 
-    for wide_ip in all_wide_ip:
-        form.append_field(wide_ip, BooleanField(wide_ip))
+    for wide_ip, values in all_wide_ip.items():
+        label_field = "{} - {}".format(wide_ip, values['site'])
+        form.append_field(wide_ip, BooleanField(label_field))
 
     return form
 

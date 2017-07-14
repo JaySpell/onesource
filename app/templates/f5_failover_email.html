@@ -2,29 +2,6 @@
 <body>
 Following customer has requested an increase in quota space.
 <table>
-<tr>
-  <td>
-    Customer First Name:
-  </td>
-  <td>
-    {{ cust_fname }}
-  </td>
-  <tr>
-    <td>
-      Customer Last Name:
-    </td>
-    <td>
-      {{ cust_lname }}
-    </td>
-  </tr>
-  <tr>
-    <td>
-      Cost Center:
-    </td>
-    <td>
-      {{ cost_cent }}
-    </td>
-  </tr>
   <tr>
     <td>
       F5 Failover Occurred
@@ -33,36 +10,31 @@ Following customer has requested an increase in quota space.
   </tr>
   <tr>
     <td>
-      Support Center Rep:
-    </td>
-    <td>
-      {{ sc_account }}
+      Admin: {{ sc_account }}
     </td>
   </tr>
+  {% for site, info in site_info.items() %}
   <tr>
     <td>
-      Site Before:
-    </td>
-    <td>
-      {{ site_before }}
+      Website Name: {{ site|e }}
     </td>
   </tr>
-  <tr>
-    <td>
-      Site After:
-    </td>
-    <td>
-      {{ site_after }}
-    </td>
-  </tr>
-  <tr>
-    <td>
-      Sites Failed Over:
-    </td>
-    <td>
-      {{ sites }}
-    </td>
-  </tr>
-</tr>
+    <tr>
+      <td>
+        DC Before: {{ info.site|e }}
+      </td>
+    </tr>
+    {% if info.site == 'TMC' %}
+    <tr>
+      <td>
+        DC After: MC
+      </td>
+    {% else %}
+      <td>
+        DC After: TMC
+      </td>
+    {% endif %}
+    </tr>
+  {% endfor %}
 </table>
 </html>

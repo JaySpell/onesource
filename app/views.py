@@ -105,21 +105,20 @@ def _switch_sites(form):
     # Setup email params
     email_dict = {}
     email_dict['sc_account'] = current_user
-    email_dict['sites'] = []
+    email_dict['sites'] = {}
 
     # Find which of the checkboxes have been selected
     select = {}
     for name, value in form.data.items():
         select[name] = value
 
-    primary_sites = session['primary_sites']
+    primary_sites = dict(session['primary_sites'])
 
     # For each checked perform failover / add to email
     for k, v in select.items():
         if v:
             gtmutil.switch_primary_gtm_pool(k)
-            email_dict['sites'].append(k)
-            email_dict['site_before'] = primary_sites[k]['site']
+            email_dict['sites'][k] = primary_sites[k]
 
     # Send email
     send_email(email_dict)
@@ -164,35 +163,21 @@ def send_email(email_dict):
     from app import mail
     from flask import render_template
 
-    MAIL_SERVER = secret.get_mail_server()
-    MAIL_PORT = secret.get_mail_port()
-    MAIL_USE_TLS = secret.get_mail_tls()
-    MAIL_USE_SSL = secret.mail_use_ssl()
-    ADMINS = secret.get_admins()
-
-    if email_dict['site_before'] == 'TMC':
-        email_dict['site_after'] = 'MC'
-    else:
-        email_dict['site_after'] = 'TMC'
+    site_info = {}
+    for site, info in email_dict['sites'].items():
+        site_info[site] = email_dict['sites'][site]
+        site_info[site]['dc'] = email_dict['sites'][site]['site']
 
     msg = Message('OneSource F5 Failover', sender='OneSource@mhhs.org',
                   recipients=ADMINS)
 
     msg.body = render_template('f5_failover.txt',
                                sc_account=email_dict['sc_account'],
-                               site_before=email_dict['site_before'],
-                               site_after=email_dict['site_after'],
-                               sites=email_dict['sites']
+                               site_info=site_info,
                                )
     msg.html = render_template('f5_failover_email.html',
                                sc_account=email_dict['sc_account'],
-                               site_before=email_dict['site_before'],
-                               site_after=email_dict['site_after'],
-                               sites=email_dict['sites']
+                               site_info=site_info
                                )
 
-    try:
-        mail.send(msg)
-        return "Email sent..."
-    except:
-        return "No email sent..."
+    mail.send(msg)

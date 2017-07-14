@@ -2,14 +2,18 @@
 {% from 'macro.html' import render_field %}
 {% block content %}
 {{ form.hidden_tag() }}
-SITE: {{ one }} for example.org
+<div class="container">
 <form action="" method="post" name="f5form">
+
+      <h3 class="success"> OneSource Website Failover</h3>
+    
   {% for field in form if field.widget.input_type != 'hidden' %}
-    <div class="item">
+    <div class="checkbox">
       {{ render_field(field) }} {{ field.label }}
     </div>
   {% endfor %}
   <br>
   <button type="submit" class="btn btn-success">Failover</button>
 </form>
+</div>
 {% endblock %}

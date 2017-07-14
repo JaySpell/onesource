@@ -69,7 +69,7 @@ def login():
 
 
 @app.route('/f5tool', methods=['GET', 'POST'])
-#@login_required
+@login_required
 def f5tool():
     form = SelectForm()
     error = None

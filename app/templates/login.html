@@ -1,37 +1,22 @@
 {% extends "base.html" %}
 {% from 'macro.html' import render_field %}
 {% block content %}
+<div class="container">
 <div id="page-content-wrapper">
-<div class="container-fluid">
-  <div class="row">
-  <div class="col-md-5">
-  <div class="panel panel-primary">
-  <div class="panel-heading">
-  <h6 class="panel-title">Login</h6>
   </div>
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
     <div class="panel-body">
-  <form action="" method=post>
+  <form action="" class="form-signin" method=post>
+    <h2 class="form-signin-heading">Login AD Account</h6>
     {{ form.hidden_tag() }}
     <div class="form-group">
-    <!--<dl>
-      <dt>Username:
-      <dd><input type=text name=username>
-      <dt>Password:
-      <dd><input type=password name=password>-->
-      {% for field in form %}
-        {{ render_field(field) }}
-      {% endfor %}
-      <br>
+          {% for field in form %}
+            {{ render_field(field) }}
+          {% endfor %}
         <input type=submit value=Login class="btn btn-primary">
-    </dl>
-  </div>
+      </div>
   </form>
 </div>
 </div>
-</div>
-<div class="col-md-7"></div>
-</div>
-</div>
-</div>
+
 {% endblock %}

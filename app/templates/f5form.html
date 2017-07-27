@@ -3,17 +3,18 @@
 {% block content %}
 {{ form.hidden_tag() }}
 <div class="container-fluid">
-<form action="" method="post" name="f5form">
-
+  <div class="panel-body">
+    <form action="" method="post" class="form" name="f5form">
       <h3 class="success"> OneSource Website Failover</h3>
-
-  {% for field in form if field.widget.input_type != 'hidden' %}
-    <div class="checkbox">
-      {{ render_field(field) }} {{ field.label }}
-    </div>
-  {% endfor %}
-  <br>
-  <button type="submit" class="btn btn-success">Failover</button>
-</form>
+      <div class="form-group">
+        {% for field in form if field.widget.input_type != 'hidden' %}
+          <div class="checkbox">
+            {{ render_field(field) }} {{ field.label }}
+          </div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-success">Failover</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

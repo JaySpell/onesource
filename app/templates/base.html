@@ -5,11 +5,13 @@
     <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/static/bootstrap/dist/js/myscript.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div class="navbar-brand">
     {% if title %}
       <title>{{ title }} F5 WebTeam Tools</title>
     {% else %}
     <title>F5 WebTeam Tools</title>
     {% endif %}
+  </div>
     <style>
       dt {
         COLOR: #3B4F99
@@ -17,12 +19,14 @@
     </style>
 
   </head>
-    <!--<header class="navbar navbar-static-top bs-docs-nav" role="banner">-->
-    <div class="navbar-brand inverse"><h4>Failover Onesource Web Services</h4></div>
-    <!--</header>-->
-    <body>
-      {% block content %}{% endblock %}
-      <div class="container-fluid"
+  <body>
+  <header class="navbar navbar-inverse navbar-static-top bs-docs-nav" role="banner">
+    <div class="navbar-brand">
+      <h4>Failover Onesource Web Services</h4>
+    </div>
+  </header>
+  {% block content %}{% endblock %}
+  <div class="container-fluid">
       {% with messages = get_flashed_messages() %}
           {% if messages %}
             <ul>

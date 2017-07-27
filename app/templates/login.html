@@ -4,18 +4,18 @@
   </div>
   {% if error %}
   <p class=error><strong>Error:</strong> {{ error }}{% endif %}
-    <div class="panel-body">
+    <div class="panel-body" style="width: 630px;">
       <form action="" class="form-signin" method=post>
         <h2 class="form-signin-heading">Login</h6>
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-      <div class="input-group">
-      <label for="username" class="">Username</label>
-      {{ form.username(class_="form-control")}}
-      <label for="password" class="">Password</label>
-      {{ form.password(class_="form-control")}}
-        <input type=submit value=Login class="btn btn-primary">
-      </div>
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+
+          <label for="username" class="">Username</label>
+          {{ form.username(class_="form-control")}}
+          <label for="password" class="">Password</label>
+          {{ form.password(class_="form-control")}}
+        </div>
+      <button type=submit value=Login class="btn btn-primary">Login</button>
     </div>
   </form>
 </div>

@@ -117,7 +117,14 @@ def _switch_sites(form):
     # For each checked perform failover / add to email
     for k, v in select.items():
         if v:
+            # Determine if fallback ip used
+            if gtmutil.fallbackip_used(k):
+                gtmutil.switch_fallback_ip(k)
+
+            # Failover pool members
             gtmutil.switch_primary_gtm_pool(k)
+
+            # Add info to email
             email_dict['sites'][k] = primary_sites[k]
 
     # Send email
@@ -169,7 +176,7 @@ def send_email(email_dict):
         site_info[site]['dc'] = email_dict['sites'][site]['site']
 
     msg = Message('OneSource F5 Failover', sender='OneSource@mhhs.org',
-                  recipients=ADMINS)
+                  recipients=secret.get_admins())
 
     msg.body = render_template('f5_failover.txt',
                                sc_account=email_dict['sc_account'],

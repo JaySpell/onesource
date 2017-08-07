@@ -3,9 +3,11 @@ from flask import Flask, g
 from config import basedir
 from flask_login import LoginManager
 from flask_mail import Mail
+from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 mail = Mail(app)
 

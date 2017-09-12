@@ -13,7 +13,10 @@ from app.user import User
 from app.MyForm import SelectForm
 import pprint
 
-sys.path.append('/home/jspell/Documents/dev')
+my_path = secret.get_path()
+for path in my_path:
+    sys.path.append(path)
+
 from f5tools import gtm, ltm
 
 all_users = {}
@@ -152,6 +155,9 @@ def _switch_sites(form):
                 else:
                     ltmutil.set_irule_vip(vip, irule,
                                           s_irules=True)
+
+                # Add iRule to email
+                email_dict['sites'][k] = primary_sites[k]
                 continue
 
             # Determine if fallback ip used
